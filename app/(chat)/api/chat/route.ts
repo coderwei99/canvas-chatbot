@@ -85,10 +85,12 @@ export function getStreamContext() {
 }
 
 export async function POST(request: Request) {
+  console.log('post request received');
   let requestBody: PostRequestBody;
 
   try {
     const json = await request.json();
+    console.log('Parsed request body:', json);
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
     return new ChatSDKError("bad_request:api").toResponse();
@@ -175,13 +177,14 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
+        console.log("Starting message stream...",selectedChatModel);
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
           experimental_activeTools:
-            selectedChatModel === "chat-model-reasoning"
+            selectedChatModel === "deepseek-reasoner"
               ? []
               : [
                   "getWeather",
